@@ -221,6 +221,21 @@
         .freq-input:focus { border-color: #00d4ff; }
         .freq-label { color: #7b61ff; font-size: 0.7rem; }
 
+        .short-name-input {
+            width: 38px;
+            padding: 2px 4px;
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 4px;
+            background: rgba(15,12,41,0.4);
+            color: #b4a7ff;
+            font-size: 0.75rem;
+            text-align: center;
+            outline: none;
+        }
+
+        .short-name-input:focus { border-color: #00d4ff; }
+        .short-name-input::placeholder { color: #7b61ff; font-size: 0.65rem; }
+
         .icon-trigger {
             cursor: pointer;
             font-size: 1.3rem;
@@ -616,6 +631,7 @@
             .form-row { gap: 10px; }
             .task-item .task-name-input { width: 50px; font-size: 0.8rem; }
             .task-item { padding: 4px 8px; }
+            .short-name-input { width: 30px; font-size: 0.7rem; }
             .icon-grid { grid-template-columns: repeat(6, 1fr); }
             .icon-option { width: 38px; height: 38px; font-size: 1.3rem; }
             .tracker-header > div { min-height: 56px; padding: 6px 2px; font-size: 0.75rem; }
@@ -757,9 +773,9 @@
                         name: '运动',
                         color: '#00d4ff',
                         tasks: [
-                            { id: genId(), name: '游泳', icon: '🏊', frequency: 1 },
-                            { id: genId(), name: '核心', icon: '💪', frequency: 3 },
-                            { id: genId(), name: '二区', icon: '🚴', frequency: 3 },
+                            { id: genId(), name: '游泳', icon: '🏊', frequency: 1, shortName: '游泳' },
+                            { id: genId(), name: '核心', icon: '💪', frequency: 3, shortName: '核' },
+                            { id: genId(), name: '二区', icon: '🚴', frequency: 3, shortName: '二' },
                         ]
                     },
                     {
@@ -767,8 +783,8 @@
                         name: '饮食',
                         color: '#ff6b9d',
                         tasks: [
-                            { id: genId(), name: '冷水鱼', icon: '🐟', frequency: 2 },
-                            { id: genId(), name: '新早', icon: '🥕', frequency: 1 },
+                            { id: genId(), name: '冷水鱼', icon: '🐟', frequency: 2, shortName: '冷' },
+                            { id: genId(), name: '新早', icon: '🥕', frequency: 1, shortName: '新早' },
                         ]
                     },
                     {
@@ -776,8 +792,8 @@
                         name: '学习',
                         color: '#7b61ff',
                         tasks: [
-                            { id: genId(), name: '读用', icon: '📚', frequency: 3 },
-                            { id: genId(), name: '乐器', icon: '🎸', frequency: 1 },
+                            { id: genId(), name: '读用', icon: '📚', frequency: 3, shortName: '读' },
+                            { id: genId(), name: '乐器', icon: '🎸', frequency: 1, shortName: '乐器' },
                         ]
                     }
                 ]
@@ -794,6 +810,8 @@
         var CONFIG_KEY = 'keepsharp_config_v2';
         var RECORDS_KEY = 'keepsharp_records_v2';
         var TEMPLATES_KEY = 'keepsharp_templates_v2';
+
+        var CIRCLED = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫', '⑬', '⑭', '⑮', '⑯', '⑰', '⑱', '⑲', '⑳'];
 
         function escHtml(str) {
             var div = document.createElement('div');
@@ -815,7 +833,7 @@
                 cat.tasks.forEach(function(task) {
                     var freq = task.frequency || 1;
                     for (var o = 0; o < freq; o++) {
-                        cells.push({ id: task.id, name: task.name, icon: task.icon, categoryId: cat.id, categoryName: cat.name, categoryColor: cat.color, occIdx: o, totalFreq: freq });
+                        cells.push({ id: task.id, name: task.name, shortName: task.shortName || task.name, icon: task.icon, categoryId: cat.id, categoryName: cat.name, categoryColor: cat.color, occIdx: o, totalFreq: freq });
                     }
                 });
             });
@@ -886,13 +904,16 @@
                     var nameInp = item.querySelector('.task-name-input');
                     var iconEl = item.querySelector('.icon-trigger');
                     var freqInp = item.querySelector('.freq-input');
+                    var shortInp = item.querySelector('.short-name-input');
                     var taskName = nameInp.value.trim() || '任务';
                     var icon = '⭐';
                     if (iconEl) {
                         icon = iconEl.textContent.trim() || '⭐';
                     }
                     var freq = parseInt(freqInp ? freqInp.value : 1) || 1;
-                    tasks.push({ id: taskId, name: taskName, icon: icon, frequency: freq });
+                    var shortName = shortInp ? shortInp.value.trim() : taskName;
+                    if (!shortName) shortName = taskName;
+                    tasks.push({ id: taskId, name: taskName, icon: icon, frequency: freq, shortName: shortName });
                 });
                 categories.push({ id: catId, name: catName, color: color, tasks: tasks });
             });
@@ -926,12 +947,14 @@
                 taskList.className = 'task-list';
                 cat.tasks.forEach(function(task) {
                     var freq = task.frequency || 1;
+                    var shortName = task.shortName || task.name;
                     var item = document.createElement('div');
                     item.className = 'task-item';
                     item.dataset.taskId = task.id;
                     item.innerHTML = '<span class="icon-trigger" onclick="openIconPicker(\'' + task.id + '\')">' + escHtml(task.icon) + '</span>' +
                         '<input class="task-name-input" type="text" value="' + escHtml(task.name) + '" oninput="onConfigChange()">' +
                         '<span class="freq-label">×</span><input class="freq-input" type="number" min="1" max="20" value="' + freq + '" oninput="onConfigChange()">' +
+                        '<input class="short-name-input" type="text" value="' + escHtml(shortName) + '" oninput="onConfigChange()" placeholder="缩写" title="表头缩写">' +
                         '<button class="btn-icon-only" onclick="deleteTask(\'' + cat.id + '\',\'' + task.id + '\')">✕</button>';
                     taskList.appendChild(item);
                 });
@@ -958,7 +981,7 @@
         }
 
         function addCategory() {
-            config.categories.push({ id: genId(), name: '新分类', color: '#00d4ff', tasks: [{ id: genId(), name: '任务', icon: '⭐', frequency: 1 }] });
+            config.categories.push({ id: genId(), name: '新分类', color: '#00d4ff', tasks: [{ id: genId(), name: '任务', icon: '⭐', frequency: 1, shortName: '任务' }] });
             saveConfig();
             renderCategoryEditor(config.categories);
             if (currentMode === 'checkin') renderCheckin();
@@ -978,7 +1001,7 @@
         function addTask(catId) {
             var cat = config.categories.find(function(c) { return c.id === catId; });
             if (!cat) return;
-            cat.tasks.push({ id: genId(), name: '新任务', icon: '⭐', frequency: 1 });
+            cat.tasks.push({ id: genId(), name: '新任务', icon: '⭐', frequency: 1, shortName: '新' });
             saveConfig();
             renderCategoryEditor(config.categories);
             if (currentMode === 'checkin') renderCheckin();
@@ -1194,7 +1217,7 @@
             var headerContainer = document.getElementById('tracker-header');
             var headerHtml = '<div class="week-col" style="width:' + colWidths.weekCol + 'px;min-width:' + colWidths.weekCol + 'px;">周 / 日期</div>';
             tasks.forEach(function(task) {
-                var label = task.totalFreq > 1 ? (task.name + (task.occIdx + 1)) : task.name;
+                var label = task.totalFreq > 1 ? (task.shortName + CIRCLED[task.occIdx]) : task.name;
                 headerHtml += '<div class="task-col" style="width:' + colWidths.taskCol + 'px;min-width:' + colWidths.taskCol + 'px;background:' + task.categoryColor + '33;">' +
                     '<span class="task-emoji">' + escHtml(task.icon) + '</span> ' + escHtml(label) + '</div>';
             });
@@ -1350,10 +1373,8 @@
             var needSave = false;
             config.categories.forEach(function(cat) {
                 cat.tasks.forEach(function(task) {
-                    if (!task.frequency) {
-                        task.frequency = 1;
-                        needSave = true;
-                    }
+                    if (!task.frequency) { task.frequency = 1; needSave = true; }
+                    if (!task.shortName) { task.shortName = task.name; needSave = true; }
                 });
             });
             if (needSave) saveConfig();
