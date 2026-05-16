@@ -1250,9 +1250,15 @@
             config.categories.forEach(function(cat) {
                 var item = document.createElement('div');
                 item.className = 'legend-item';
-                var icons = '';
-                cat.tasks.forEach(function(t) { icons += '<span class="emoji-icon">' + escHtml(t.icon) + '</span> '; });
-                item.innerHTML = '<span class="legend-dot" style="background:' + cat.color + ';color:' + cat.color + ';"></span><span class="legend-text">' + escHtml(cat.name) + ': ' + icons + '</span>';
+                var seen = {};
+                var parts = [];
+                cat.tasks.forEach(function(t) {
+                    if (!seen[t.icon]) {
+                        seen[t.icon] = true;
+                        parts.push('<span class="emoji-icon">' + escHtml(t.icon) + '</span>' + escHtml(t.name));
+                    }
+                });
+                item.innerHTML = '<span class="legend-dot" style="background:' + cat.color + ';color:' + cat.color + ';"></span><span class="legend-text">' + escHtml(cat.name) + ': ' + parts.join(' ') + '</span>';
                 container.appendChild(item);
             });
         }
