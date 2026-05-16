@@ -1,7 +1,7 @@
 const CACHE = 'habit-tracker-v1';
 
 const PRECACHE_URLS = [
-  './cyber.html',
+  './index.html',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-solid-900.woff2',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-regular-400.woff2',

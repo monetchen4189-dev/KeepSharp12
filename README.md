@@ -24,10 +24,12 @@
 
 1. Fork 或克隆本仓库
 2. 推送到你的 GitHub 仓库
-3. 进入仓库 Settings → Pages → 选择 `main` 分支 → 保存
-4. 等待 1-2 分钟，访问 `https://你的用户名.github.io/仓库名/cyber.html`
+2. 进入仓库 Settings → Pages → 选择 `main` 分支 → 保存
+3. 等待 1-2 分钟，访问 `https://你的用户名.github.io/仓库名/`
 
 > 本项目已配置 GitHub Actions，推送 `main` 分支后会自动部署到 Pages。
+>
+> 访问地址：`https://你的用户名.github.io/仓库名/`（`cyber.html` 已重命名为 `index.html`）
 
 #### 方式二：任意静态托管
 
