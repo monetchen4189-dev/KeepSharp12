@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>计划打卡 · 个人定制版</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -88,8 +87,6 @@
             align-items: center;
             gap: 10px;
         }
-
-        .setup-card h2 i { color: #7b61ff; }
 
         .form-row {
             display: flex;
@@ -211,16 +208,16 @@
 
         .icon-trigger {
             cursor: pointer;
-            color: #b4a7ff;
-            font-size: 1rem;
-            width: 28px;
-            height: 28px;
+            font-size: 1.3rem;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 6px;
             transition: all 0.2s;
             border: 1px solid transparent;
+            line-height: 1;
         }
 
         .icon-trigger:hover {
@@ -300,22 +297,20 @@
             border-radius: 8px;
             border: 2px solid transparent;
             cursor: pointer;
-            font-size: 1.2rem;
-            color: #b4a7ff;
+            font-size: 1.5rem;
             transition: all 0.2s;
             background: rgba(15,12,41,0.6);
+            line-height: 1;
         }
 
         .icon-option:hover {
             border-color: rgba(0,212,255,0.4);
             background: rgba(0,212,255,0.1);
-            color: #fff;
         }
 
         .icon-option.selected {
             border-color: #00d4ff;
             background: rgba(0,212,255,0.2);
-            color: #00d4ff;
             box-shadow: 0 0 15px rgba(0,212,255,0.3);
         }
 
@@ -395,6 +390,7 @@
 
         .legend-dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 8px currentColor; flex-shrink: 0; }
         .legend-text { font-size: 0.85rem; }
+        .legend-text .emoji-icon { font-size: 1rem; }
 
         .tracker {
             background: rgba(40,35,75,0.85);
@@ -440,7 +436,11 @@
             gap: 2px;
         }
 
-        .tracker-header .task-col i { writing-mode: horizontal-tb; margin-bottom: 2px; }
+        .tracker-header .task-col .task-emoji {
+            writing-mode: horizontal-tb;
+            margin-bottom: 2px;
+            font-size: 1rem;
+        }
 
         .week-row { display: grid; }
         .week-row:last-child { border-bottom: none; }
@@ -602,7 +602,7 @@
             .task-item .task-name-input { width: 50px; font-size: 0.8rem; }
             .task-item { padding: 4px 8px; }
             .icon-grid { grid-template-columns: repeat(6, 1fr); }
-            .icon-option { width: 38px; height: 38px; font-size: 1rem; }
+            .icon-option { width: 38px; height: 38px; font-size: 1.3rem; }
             .tracker-header > div { min-height: 56px; padding: 6px 2px; font-size: 0.75rem; }
             .check-cell { min-height: 36px; font-size: 0.9rem; }
             .week-num .week-label { font-size: 0.8rem; }
@@ -614,7 +614,7 @@
 
         @media (max-width: 480px) {
             .icon-grid { grid-template-columns: repeat(5, 1fr); }
-            .icon-option { width: 34px; height: 34px; font-size: 0.9rem; }
+            .icon-option { width: 34px; height: 34px; font-size: 1.1rem; }
             .mode-btn { padding: 8px 18px; font-size: 0.85rem; }
         }
     </style>
@@ -627,13 +627,13 @@
         </header>
 
         <div class="mode-toggle">
-            <button class="mode-btn active" data-mode="checkin" onclick="switchMode('checkin')"><i class="fas fa-check-circle"></i> 打卡模式</button>
-            <button class="mode-btn" data-mode="setup" onclick="switchMode('setup')"><i class="fas fa-sliders-h"></i> 设置模式</button>
+            <button class="mode-btn active" data-mode="checkin" onclick="switchMode('checkin')">✅ 打卡模式</button>
+            <button class="mode-btn" data-mode="setup" onclick="switchMode('setup')">⚙️ 设置模式</button>
         </div>
 
         <div id="setup-section" class="section">
             <div class="setup-card">
-                <h2><i class="fas fa-clipboard-list"></i> 计划信息</h2>
+                <h2>📋 计划信息</h2>
                 <div class="form-row">
                     <div class="form-group">
                         <label>计划名称</label>
@@ -658,19 +658,19 @@
             </div>
 
             <div class="setup-card">
-                <h2><i class="fas fa-layer-group"></i> 分类与任务</h2>
+                <h2>🗂️ 分类与任务</h2>
                 <div id="category-editor" class="category-list"></div>
                 <button class="btn btn-secondary" onclick="addCategory()" style="margin-top: 14px;">
-                    <i class="fas fa-plus"></i> 添加分类
+                    ➕ 添加分类
                 </button>
             </div>
 
             <div class="setup-card">
-                <h2><i class="fas fa-puzzle-piece"></i> 模板管理</h2>
+                <h2>🧩 模板管理</h2>
                 <div class="form-row">
-                    <button class="btn btn-primary" onclick="saveTemplate()"><i class="fas fa-save"></i> 保存为模板</button>
-                    <button class="btn btn-success" onclick="exportTemplate()"><i class="fas fa-file-export"></i> 导出模板</button>
-                    <button class="btn btn-secondary" onclick="importTemplate()"><i class="fas fa-file-import"></i> 导入模板</button>
+                    <button class="btn btn-primary" onclick="saveTemplate()">💾 保存为模板</button>
+                    <button class="btn btn-success" onclick="exportTemplate()">📤 导出模板</button>
+                    <button class="btn btn-secondary" onclick="importTemplate()">📥 导入模板</button>
                 </div>
                 <div id="template-list" class="template-list"></div>
             </div>
@@ -688,9 +688,9 @@
             </div>
 
             <div class="actions">
-                <button class="btn btn-primary" onclick="exportRecords()"><i class="fas fa-download"></i> 导出数据</button>
-                <button class="btn btn-secondary" onclick="importRecords()"><i class="fas fa-upload"></i> 导入数据</button>
-                <button class="btn btn-danger" onclick="clearRecords()"><i class="fas fa-trash-alt"></i> 清空所有</button>
+                <button class="btn btn-primary" onclick="exportRecords()">📥 导出数据</button>
+                <button class="btn btn-secondary" onclick="importRecords()">📤 导入数据</button>
+                <button class="btn btn-danger" onclick="clearRecords()">🗑️ 清空所有</button>
             </div>
         </div>
     </div>
@@ -705,7 +705,7 @@
 
     <div class="modal-overlay" id="icon-modal">
         <div class="modal">
-            <h3><i class="fas fa-icons"></i> 选择图标</h3>
+            <h3>😊 选择表情</h3>
             <div class="icon-grid" id="icon-grid"></div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeIconPicker()">取消</button>
@@ -715,19 +715,15 @@
     </div>
 
     <script>
-        var AVAILABLE_ICONS = [
-            'fa-person-swimming', 'fa-dumbbell', 'fa-running', 'fa-bicycle',
-            'fa-person-walking', 'fa-heart-pulse', 'fa-person-biking', 'fa-person-hiking',
-            'fa-fish', 'fa-carrot', 'fa-apple-whole', 'fa-leaf',
-            'fa-egg', 'fa-bowl-food', 'fa-mug-saucer', 'fa-wine-bottle',
-            'fa-book', 'fa-guitar', 'fa-headphones', 'fa-pen-fancy',
-            'fa-brain', 'fa-puzzle-piece', 'fa-language', 'fa-laptop-code',
-            'fa-star', 'fa-check', 'fa-fire', 'fa-moon',
-            'fa-sun', 'fa-bolt', 'fa-feather', 'fa-gem',
-            'fa-music', 'fa-palette', 'fa-camera', 'fa-gamepad',
-            'fa-trophy', 'fa-medal', 'fa-crown', 'fa-rocket',
-            'fa-walk', 'fa-water', 'fa-utensils', 'fa-drum',
-            'fa-hand-fist', 'fa-person-skiing', 'fa-person-snowboarding', 'fa-person-running',
+        var AVAILABLE_EMOJIS = [
+            '🏊', '🏋️', '🏃', '🚴', '🚶', '🧘', '🤸', '⛹️',
+            '💪', '🏋️', '🤾', '🧗', '🏄', '🚣', '🥊', '🤺',
+            '🐟', '🥕', '🍎', '🥬', '🥚', '🥗', '☕', '🍷',
+            '📚', '🎸', '🎧', '✍️', '🧠', '🧩', '🗣️', '💻',
+            '⭐', '✅', '🔥', '🌙', '☀️', '⚡', '🪶', '💎',
+            '🎵', '🎨', '📷', '🎮', '🏆', '🥇', '👑', '🚀',
+            '🎯', '🎼', '🥁', '🎹', '🧭', '💡', '📝', '🔬',
+            '🌱', '🌸', '🍵', '🥤', '🧋', '🍜', '🥩', '🥦',
         ];
 
         function genId() {
@@ -746,13 +742,13 @@
                         name: '运动',
                         color: '#00d4ff',
                         tasks: [
-                            { id: genId(), name: '游泳', icon: 'fa-person-swimming' },
-                            { id: genId(), name: '核①', icon: 'fa-dumbbell' },
-                            { id: genId(), name: '核②', icon: 'fa-dumbbell' },
-                            { id: genId(), name: '核③', icon: 'fa-dumbbell' },
-                            { id: genId(), name: '二①', icon: 'fa-person-biking' },
-                            { id: genId(), name: '二②', icon: 'fa-person-biking' },
-                            { id: genId(), name: '二③', icon: 'fa-person-biking' },
+                            { id: genId(), name: '游泳', icon: '🏊' },
+                            { id: genId(), name: '核①', icon: '💪' },
+                            { id: genId(), name: '核②', icon: '💪' },
+                            { id: genId(), name: '核③', icon: '💪' },
+                            { id: genId(), name: '二①', icon: '🚴' },
+                            { id: genId(), name: '二②', icon: '🚴' },
+                            { id: genId(), name: '二③', icon: '🚴' },
                         ]
                     },
                     {
@@ -760,9 +756,9 @@
                         name: '饮食',
                         color: '#ff6b9d',
                         tasks: [
-                            { id: genId(), name: '冷①', icon: 'fa-fish' },
-                            { id: genId(), name: '冷②', icon: 'fa-fish' },
-                            { id: genId(), name: '新早', icon: 'fa-carrot' },
+                            { id: genId(), name: '冷①', icon: '🐟' },
+                            { id: genId(), name: '冷②', icon: '🐟' },
+                            { id: genId(), name: '新早', icon: '🥕' },
                         ]
                     },
                     {
@@ -770,10 +766,10 @@
                         name: '学习',
                         color: '#7b61ff',
                         tasks: [
-                            { id: genId(), name: '读用①', icon: 'fa-book' },
-                            { id: genId(), name: '读用②', icon: 'fa-book' },
-                            { id: genId(), name: '读用③', icon: 'fa-book' },
-                            { id: genId(), name: '乐器', icon: 'fa-guitar' },
+                            { id: genId(), name: '读用①', icon: '📚' },
+                            { id: genId(), name: '读用②', icon: '📚' },
+                            { id: genId(), name: '读用③', icon: '📚' },
+                            { id: genId(), name: '乐器', icon: '🎸' },
                         ]
                     }
                 ]
@@ -877,13 +873,11 @@
                 taskItems.forEach(function(item) {
                     var taskId = item.dataset.taskId;
                     var nameInp = item.querySelector('.task-name-input');
-                    var iconEl = item.querySelector('.icon-trigger i');
+                    var iconEl = item.querySelector('.icon-trigger');
                     var taskName = nameInp.value.trim() || '任务';
-                    var icon = 'fa-star';
+                    var icon = '⭐';
                     if (iconEl) {
-                        var cls = iconEl.className;
-                        var match = cls.match(/fa-[a-z0-9-]+/g);
-                        if (match) icon = match[0];
+                        icon = iconEl.textContent.trim() || '⭐';
                     }
                     tasks.push({ id: taskId, name: taskName, icon: icon });
                 });
@@ -913,7 +907,7 @@
                     '<div class="color-picker-wrapper">' +
                     '<input class="cat-color-input" type="color" value="' + cat.color + '" oninput="onConfigChange()">' +
                     '<span class="color-hex">' + cat.color + '</span></div>' +
-                    '<button class="del-cat-btn" onclick="deleteCategory(\'' + cat.id + '\')"><i class="fas fa-trash"></i> 删除</button>';
+                    '<button class="del-cat-btn" onclick="deleteCategory(\'' + cat.id + '\')">🗑️ 删除</button>';
                 card.appendChild(header);
                 var taskList = document.createElement('div');
                 taskList.className = 'task-list';
@@ -921,15 +915,15 @@
                     var item = document.createElement('div');
                     item.className = 'task-item';
                     item.dataset.taskId = task.id;
-                    item.innerHTML = '<span class="icon-trigger" onclick="openIconPicker(\'' + task.id + '\')"><i class="fas ' + task.icon + '"></i></span>' +
+                    item.innerHTML = '<span class="icon-trigger" onclick="openIconPicker(\'' + task.id + '\')">' + escHtml(task.icon) + '</span>' +
                         '<input class="task-name-input" type="text" value="' + escHtml(task.name) + '" oninput="onConfigChange()">' +
-                        '<button class="btn-icon-only" onclick="deleteTask(\'' + cat.id + '\',\'' + task.id + '\')"><i class="fas fa-times"></i></button>';
+                        '<button class="btn-icon-only" onclick="deleteTask(\'' + cat.id + '\',\'' + task.id + '\')">✕</button>';
                     taskList.appendChild(item);
                 });
                 card.appendChild(taskList);
                 var addBtn = document.createElement('button');
                 addBtn.className = 'btn-icon-only add-task';
-                addBtn.innerHTML = '<i class="fas fa-plus"></i> 添加任务';
+                addBtn.innerHTML = '➕ 添加任务';
                 addBtn.onclick = function() { addTask(cat.id); };
                 card.appendChild(addBtn);
                 container.appendChild(card);
@@ -949,7 +943,7 @@
         }
 
         function addCategory() {
-            config.categories.push({ id: genId(), name: '新分类', color: '#00d4ff', tasks: [{ id: genId(), name: '任务', icon: 'fa-star' }] });
+            config.categories.push({ id: genId(), name: '新分类', color: '#00d4ff', tasks: [{ id: genId(), name: '任务', icon: '⭐' }] });
             saveConfig();
             renderCategoryEditor(config.categories);
             if (currentMode === 'checkin') renderCheckin();
@@ -969,7 +963,7 @@
         function addTask(catId) {
             var cat = config.categories.find(function(c) { return c.id === catId; });
             if (!cat) return;
-            cat.tasks.push({ id: genId(), name: '新任务', icon: 'fa-star' });
+            cat.tasks.push({ id: genId(), name: '新任务', icon: '⭐' });
             saveConfig();
             renderCategoryEditor(config.categories);
             if (currentMode === 'checkin') renderCheckin();
@@ -1020,17 +1014,17 @@
             pickingTaskId = taskId;
             var tasks = flattenTasks(config);
             var task = tasks.find(function(t) { return t.id === taskId; });
-            selectedIcon = task ? task.icon : 'fa-star';
+            selectedIcon = task ? task.icon : '⭐';
             var grid = document.getElementById('icon-grid');
             grid.innerHTML = '';
-            AVAILABLE_ICONS.forEach(function(icon) {
+            AVAILABLE_EMOJIS.forEach(function(emoji) {
                 var div = document.createElement('div');
-                div.className = 'icon-option' + (icon === selectedIcon ? ' selected' : '');
-                div.innerHTML = '<i class="fas ' + icon + '"></i>';
+                div.className = 'icon-option' + (emoji === selectedIcon ? ' selected' : '');
+                div.textContent = emoji;
                 div.onclick = function() {
                     document.querySelectorAll('.icon-option').forEach(function(el) { el.classList.remove('selected'); });
                     div.classList.add('selected');
-                    selectedIcon = icon;
+                    selectedIcon = emoji;
                 };
                 grid.appendChild(div);
             });
@@ -1060,7 +1054,7 @@
         function renderTemplates() {
             var container = document.getElementById('template-list');
             if (templates.length === 0) {
-                container.innerHTML = '<div class="empty-tpl"><i class="fas fa-folder-open"></i> 暂无保存的模板</div>';
+                container.innerHTML = '<div class="empty-tpl">📂 暂无保存的模板</div>';
                 return;
             }
             container.innerHTML = '';
@@ -1069,12 +1063,12 @@
                 el.className = 'template-item';
                 var taskCount = 0;
                 tpl.config.categories.forEach(function(c) { taskCount += c.tasks.length; });
-                el.innerHTML = '<div><div class="tpl-name"><i class="fas fa-puzzle-piece"></i> ' + escHtml(tpl.name) + '</div>' +
+                el.innerHTML = '<div><div class="tpl-name">🧩 ' + escHtml(tpl.name) + '</div>' +
                     '<div class="tpl-info">' + tpl.config.categories.length + ' 个分类 ' + taskCount + ' 个任务 ' + tpl.config.totalWeeks + ' 周</div></div>' +
                     '<div class="tpl-actions">' +
-                    '<button class="tpl-load-btn" onclick="loadTemplate(\'' + tpl.id + '\')"><i class="fas fa-download"></i> 加载</button>' +
-                    '<button class="tpl-export-btn" onclick="exportSingleTemplate(\'' + tpl.id + '\')"><i class="fas fa-file-export"></i> 导出</button>' +
-                    '<button class="tpl-del-btn" onclick="deleteTemplate(\'' + tpl.id + '\')"><i class="fas fa-trash"></i> 删除</button></div>';
+                    '<button class="tpl-load-btn" onclick="loadTemplate(\'' + tpl.id + '\')">📥 加载</button>' +
+                    '<button class="tpl-export-btn" onclick="exportSingleTemplate(\'' + tpl.id + '\')">📤 导出</button>' +
+                    '<button class="tpl-del-btn" onclick="deleteTemplate(\'' + tpl.id + '\')">🗑️ 删除</button></div>';
                 container.appendChild(el);
             });
         }
@@ -1181,9 +1175,9 @@
             var headerHtml = '<div class="week-col" style="width:' + colWidths.weekCol + 'px;min-width:' + colWidths.weekCol + 'px;">周 / 日期</div>';
             tasks.forEach(function(task) {
                 headerHtml += '<div class="task-col" style="width:' + colWidths.taskCol + 'px;min-width:' + colWidths.taskCol + 'px;background:' + task.categoryColor + '33;">' +
-                    '<i class="fas ' + task.icon + '"></i> ' + escHtml(task.name) + '</div>';
+                    '<span class="task-emoji">' + escHtml(task.icon) + '</span> ' + escHtml(task.name) + '</div>';
             });
-            headerHtml += '<div style="width:' + colWidths.progressCol + 'px;min-width:' + colWidths.progressCol + 'px;"><i class="fas fa-percent"></i> 进度</div>';
+            headerHtml += '<div style="width:' + colWidths.progressCol + 'px;min-width:' + colWidths.progressCol + 'px;">% 进度</div>';
             headerContainer.innerHTML = headerHtml;
             headerContainer.style.gridTemplateColumns = colWidths.weekCol + 'px repeat(' + tasks.length + ', ' + colWidths.taskCol + 'px) ' + colWidths.progressCol + 'px';
 
@@ -1257,7 +1251,7 @@
                 var item = document.createElement('div');
                 item.className = 'legend-item';
                 var icons = '';
-                cat.tasks.forEach(function(t) { icons += '<i class="fas ' + t.icon + '"></i> '; });
+                cat.tasks.forEach(function(t) { icons += '<span class="emoji-icon">' + escHtml(t.icon) + '</span> '; });
                 item.innerHTML = '<span class="legend-dot" style="background:' + cat.color + ';color:' + cat.color + ';"></span><span class="legend-text">' + escHtml(cat.name) + ': ' + icons + '</span>';
                 container.appendChild(item);
             });

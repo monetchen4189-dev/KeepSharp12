@@ -1,11 +1,7 @@
-const CACHE = 'habit-tracker-v1';
+const CACHE = 'habit-tracker-v2';
 
 const PRECACHE_URLS = [
   './index.html',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-solid-900.woff2',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-regular-400.woff2',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-brands-400.woff2',
 ];
 
 self.addEventListener('install', (event) => {
@@ -28,8 +24,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-
-  if (url.origin === location.origin || url.host === 'cdnjs.cloudflare.com') {
+  if (url.origin === location.origin) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
         const fetchPromise = fetch(event.request).then((response) => {
@@ -39,7 +34,6 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         }).catch(() => {});
-
         return cached || fetchPromise;
       })
     );
