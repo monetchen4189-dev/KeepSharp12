@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>计划打卡 · 个人定制版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #2a1f5e 0%, #4a3f7a 50%, #3d3266 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        header { text-align: center; margin-bottom: 20px; }
+
+        #plan-title {
+            color: #00d4ff;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(0,212,255,0.5), 0 0 40px rgba(0,212,255,0.3);
+            margin-bottom: 6px;
+            letter-spacing: 2px;
+        }
+
+        #plan-subtitle {
+            color: #b4a7ff;
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-shadow: 0 0 10px rgba(180,167,255,0.5);
+        }
+
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            padding: 10px 28px;
+            border: 2px solid rgba(0,212,255,0.4);
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(15,12,41,0.6);
+            color: #b4a7ff;
+            backdrop-filter: blur(10px);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.5);
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: rgba(0,212,255,0.15);
+            border-color: rgba(0,212,255,0.7);
+        }
+
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .setup-card {
+            background: rgba(40,35,75,0.85);
+            border-radius: 16px;
+            border: 1px solid rgba(0,212,255,0.25);
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .setup-card h2 {
+            color: #00d4ff;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setup-card h2 i { color: #7b61ff; }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-group label { color: #b4a7ff; font-size: 0.85rem; font-weight: 500; }
+
+        .form-group input, .form-group select {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,212,255,0.3);
+            background: rgba(15,12,41,0.8);
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0,212,255,0.2);
+        }
+
+        .form-group input[type="number"] { width: 80px; }
+        .form-group input[type="date"] { width: 160px; }
+        .form-group input[type="text"] { width: 220px; }
+
+        .form-hint { color: #7b61ff; font-size: 0.75rem; margin-top: 2px; }
+
+        .category-list { display: flex; flex-direction: column; gap: 14px; }
+
+        .category-card {
+            background: rgba(15,12,41,0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(0,212,255,0.15);
+            padding: 16px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .category-header .cat-name-input {
+            flex: 1;
+            min-width: 100px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(0,212,255,0.25);
+            background: rgba(15,12,41,0.8);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .category-header .cat-name-input:focus { border-color: #00d4ff; }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            width: 36px;
+            height: 36px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            background: none;
+            padding: 2px;
+        }
+
+        .color-picker-wrapper input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-picker-wrapper input[type="color"]::-webkit-color-swatch { border: none; border-radius: 5px; }
+
+        .color-hex { color: #b4a7ff; font-size: 0.8rem; font-family: monospace; min-width: 60px; }
+
+        .task-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(40,35,75,0.6);
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 8px;
+            padding: 6px 10px;
+            transition: border-color 0.2s;
+        }
+
+        .task-item:hover { border-color: rgba(0,212,255,0.4); }
+
+        .task-item .task-name-input {
+            width: 70px;
+            padding: 4px 6px;
+            border: none;
+            background: transparent;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+            border-bottom: 1px solid transparent;
+        }
+
+        .task-item .task-name-input:focus { border-bottom-color: #00d4ff; }
+
+        .icon-trigger {
+            cursor: pointer;
+            color: #b4a7ff;
+            font-size: 1rem;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .icon-trigger:hover {
+            background: rgba(0,212,255,0.15);
+            border-color: rgba(0,212,255,0.3);
+        }
+
+        .btn-icon-only {
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #ff6b9d;
+            font-size: 0.9rem;
+            padding: 4px 6px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            opacity: 0.6;
+        }
+
+        .btn-icon-only:hover { opacity: 1; background: rgba(255,107,157,0.15); }
+        .btn-icon-only.add-task { color: #00d4ff; }
+        .btn-icon-only.add-task:hover { background: rgba(0,212,255,0.15); }
+
+        .del-cat-btn {
+            padding: 4px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,107,157,0.4);
+            background: rgba(255,107,157,0.1);
+            color: #ff6b9d;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .del-cat-btn:hover { background: rgba(255,107,157,0.25); }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: rgba(40,35,75,0.97);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 480px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal h3 { color: #00d4ff; font-size: 1.1rem; margin-bottom: 14px; }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .icon-option {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #b4a7ff;
+            transition: all 0.2s;
+            background: rgba(15,12,41,0.6);
+        }
+
+        .icon-option:hover {
+            border-color: rgba(0,212,255,0.4);
+            background: rgba(0,212,255,0.1);
+            color: #fff;
+        }
+
+        .icon-option.selected {
+            border-color: #00d4ff;
+            background: rgba(0,212,255,0.2);
+            color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0,212,255,0.3);
+        }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+        .modal-actions button {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-actions .btn-confirm { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .modal-actions .btn-cancel { background: rgba(255,255,255,0.1); color: #b4a7ff; }
+        .modal-actions button:hover { transform: translateY(-1px); }
+
+        .template-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+
+        .template-item {
+            background: rgba(15,12,41,0.6);
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .template-item:hover { border-color: rgba(0,212,255,0.4); }
+        .template-item .tpl-name { color: #fff; font-weight: 500; font-size: 0.95rem; }
+        .template-item .tpl-info { color: #7b61ff; font-size: 0.8rem; }
+        .template-item .tpl-actions { display: flex; gap: 4px; }
+
+        .template-item .tpl-actions button {
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tpl-load-btn { background: rgba(0,212,255,0.2); color: #00d4ff; }
+        .tpl-load-btn:hover { background: rgba(0,212,255,0.35); }
+        .tpl-export-btn { background: rgba(123,97,255,0.2); color: #7b61ff; }
+        .tpl-export-btn:hover { background: rgba(123,97,255,0.35); }
+        .tpl-del-btn { background: rgba(255,107,157,0.2); color: #ff6b9d; }
+        .tpl-del-btn:hover { background: rgba(255,107,157,0.35); }
+
+        .empty-tpl { color: #7b61ff; font-size: 0.9rem; padding: 12px 0; }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(15,12,41,0.8);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,212,255,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            color: #fff;
+        }
+
+        .legend-dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 8px currentColor; flex-shrink: 0; }
+        .legend-text { font-size: 0.85rem; }
+
+        .tracker {
+            background: rgba(40,35,75,0.85);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(0,212,255,0.15);
+            overflow-x: auto;
+            border: 1px solid rgba(0,212,255,0.3);
+            backdrop-filter: blur(10px);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tracker-inner { min-width: 100%; display: inline-block; }
+
+        .tracker-header {
+            display: grid;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tracker-header > div {
+            padding: 10px 3px;
+            text-align: center;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-height: 70px;
+            word-break: break-all;
+        }
+
+        .tracker-header > div:last-child { border-right: none; }
+
+        .tracker-header .week-col { background: rgba(0,0,0,0.3); font-size: 0.85rem; }
+
+        .tracker-header .task-col {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.8rem;
+            gap: 2px;
+        }
+
+        .tracker-header .task-col i { writing-mode: horizontal-tb; margin-bottom: 2px; }
+
+        .week-row { display: grid; }
+        .week-row:last-child { border-bottom: none; }
+        .week-row:hover { background: rgba(0,212,255,0.05); }
+
+        .week-num {
+            background: rgba(60,50,100,0.5);
+            font-weight: 600;
+            color: #b4a7ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            padding: 6px;
+            border-bottom: 1px solid rgba(0,212,255,0.25);
+        }
+
+        .week-num .week-label { font-size: 0.9rem; color: #00d4ff; }
+        .week-num .date-range { font-size: 0.65rem; color: #7b61ff; font-weight: 400; }
+
+        .check-cell {
+            border-right: 1px solid rgba(0,212,255,0.15);
+            border-bottom: 1px solid rgba(0,212,255,0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+
+        .check-cell:hover { transform: scale(1.1); background: rgba(0,212,255,0.1); }
+
+        .check-cell.checked {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white;
+            border: none !important;
+            box-shadow: 0 0 15px rgba(102,126,234,0.4), inset 0 0 8px rgba(255,255,255,0.15);
+        }
+
+        .check-cell.checked::after {
+            content: "\2713";
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(255,255,255,0.5);
+        }
+
+        .progress-col {
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            border-bottom: 1px solid rgba(0,212,255,0.15);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: rgba(40,35,75,0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(0,212,255,0.35);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff 0%, #7b61ff 50%, #ff6b9d 100%);
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            position: absolute;
+            left: 0; top: 0;
+            box-shadow: 0 0 20px rgba(0,212,255,0.5);
+        }
+
+        .progress-text {
+            position: relative;
+            z-index: 2;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .summary-row {
+            display: grid;
+            background: rgba(123,97,255,0.1);
+            font-weight: 600;
+        }
+
+        .summary-row > div {
+            padding: 12px 3px;
+            text-align: center;
+            border-top: 2px solid rgba(123,97,255,0.3);
+        }
+
+        .summary-label { background: rgba(123,97,255,0.3); color: #b4a7ff; }
+        .total-count { font-size: 0.85rem; color: #7b61ff; }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.4); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.6); }
+        .btn-secondary { background: rgba(0,212,255,0.2); color: #00d4ff; border: 2px solid rgba(0,212,255,0.5); backdrop-filter: blur(10px); }
+        .btn-secondary:hover { background: rgba(0,212,255,0.3); box-shadow: 0 0 20px rgba(0,212,255,0.3); }
+        .btn-danger { background: rgba(255,107,157,0.2); color: #ff6b9d; border: 2px solid rgba(255,107,157,0.5); backdrop-filter: blur(10px); }
+        .btn-danger:hover { background: rgba(255,107,157,0.3); box-shadow: 0 0 20px rgba(255,107,157,0.3); }
+        .btn-success { background: rgba(0,200,83,0.2); color: #00c853; border: 2px solid rgba(0,200,83,0.5); backdrop-filter: blur(10px); }
+        .btn-success:hover { background: rgba(0,200,83,0.3); box-shadow: 0 0 20px rgba(0,200,83,0.3); }
+
+        .save-status {
+            position: fixed;
+            top: 20px; right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .save-status.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            #plan-title { font-size: 1.8rem; }
+            #plan-subtitle { font-size: 1rem; }
+            .setup-card { padding: 16px; }
+            .form-group input[type="text"] { width: 160px; }
+            .form-row { gap: 10px; }
+            .task-item .task-name-input { width: 50px; font-size: 0.8rem; }
+            .task-item { padding: 4px 8px; }
+            .icon-grid { grid-template-columns: repeat(6, 1fr); }
+            .icon-option { width: 38px; height: 38px; font-size: 1rem; }
+            .tracker-header > div { min-height: 56px; padding: 6px 2px; font-size: 0.75rem; }
+            .check-cell { min-height: 36px; font-size: 0.9rem; }
+            .week-num .week-label { font-size: 0.8rem; }
+            .week-num .date-range { font-size: 0.55rem; }
+            .progress-bar { height: 20px; }
+            .legend-item { padding: 8px 16px; font-size: 0.85rem; }
+            .template-item { flex-wrap: wrap; }
+        }
+
+        @media (max-width: 480px) {
+            .icon-grid { grid-template-columns: repeat(5, 1fr); }
+            .icon-option { width: 34px; height: 34px; font-size: 0.9rem; }
+            .mode-btn { padding: 8px 18px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div id="plan-title">Keep Sharp</div>
+            <div id="plan-subtitle">My 12-Week Plan</div>
+        </header>
+
+        <div class="mode-toggle">
+            <button class="mode-btn active" data-mode="checkin" onclick="switchMode('checkin')"><i class="fas fa-check-circle"></i> 打卡模式</button>
+            <button class="mode-btn" data-mode="setup" onclick="switchMode('setup')"><i class="fas fa-sliders-h"></i> 设置模式</button>
+        </div>
+
+        <div id="setup-section" class="section">
+            <div class="setup-card">
+                <h2><i class="fas fa-clipboard-list"></i> 计划信息</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>计划名称</label>
+                        <input type="text" id="input-plan-name" oninput="onConfigChange()">
+                    </div>
+                    <div class="form-group">
+                        <label>副标题</label>
+                        <input type="text" id="input-plan-subtitle" oninput="onConfigChange()">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>总周数</label>
+                        <input type="number" id="input-total-weeks" min="1" max="52" oninput="onConfigChange()">
+                        <span class="form-hint">1 ~ 52 周</span>
+                    </div>
+                    <div class="form-group">
+                        <label>起始日期</label>
+                        <input type="date" id="input-start-date" onchange="onConfigChange()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="setup-card">
+                <h2><i class="fas fa-layer-group"></i> 分类与任务</h2>
+                <div id="category-editor" class="category-list"></div>
+                <button class="btn btn-secondary" onclick="addCategory()" style="margin-top: 14px;">
+                    <i class="fas fa-plus"></i> 添加分类
+                </button>
+            </div>
+
+            <div class="setup-card">
+                <h2><i class="fas fa-puzzle-piece"></i> 模板管理</h2>
+                <div class="form-row">
+                    <button class="btn btn-primary" onclick="saveTemplate()"><i class="fas fa-save"></i> 保存为模板</button>
+                    <button class="btn btn-success" onclick="exportTemplate()"><i class="fas fa-file-export"></i> 导出模板</button>
+                    <button class="btn btn-secondary" onclick="importTemplate()"><i class="fas fa-file-import"></i> 导入模板</button>
+                </div>
+                <div id="template-list" class="template-list"></div>
+            </div>
+        </div>
+
+        <div id="checkin-section" class="section active">
+            <div id="legend-container" class="legend"></div>
+
+            <div class="tracker">
+                <div class="tracker-inner">
+                    <div id="tracker-header" class="tracker-header"></div>
+                    <div id="weeks-container"></div>
+                    <div id="summary-row" class="summary-row"></div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="exportRecords()"><i class="fas fa-download"></i> 导出数据</button>
+                <button class="btn btn-secondary" onclick="importRecords()"><i class="fas fa-upload"></i> 导入数据</button>
+                <button class="btn btn-danger" onclick="clearRecords()"><i class="fas fa-trash-alt"></i> 清空所有</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-status" id="saveStatus">已保存</div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(function() {});
+        }
+    </script>
+
+    <div class="modal-overlay" id="icon-modal">
+        <div class="modal">
+            <h3><i class="fas fa-icons"></i> 选择图标</h3>
+            <div class="icon-grid" id="icon-grid"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeIconPicker()">取消</button>
+                <button class="btn-confirm" onclick="confirmIcon()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var AVAILABLE_ICONS = [
+            'fa-person-swimming', 'fa-dumbbell', 'fa-running', 'fa-bicycle',
+            'fa-person-walking', 'fa-heart-pulse', 'fa-person-biking', 'fa-person-hiking',
+            'fa-fish', 'fa-carrot', 'fa-apple-whole', 'fa-leaf',
+            'fa-egg', 'fa-bowl-food', 'fa-mug-saucer', 'fa-wine-bottle',
+            'fa-book', 'fa-guitar', 'fa-headphones', 'fa-pen-fancy',
+            'fa-brain', 'fa-puzzle-piece', 'fa-language', 'fa-laptop-code',
+            'fa-star', 'fa-check', 'fa-fire', 'fa-moon',
+            'fa-sun', 'fa-bolt', 'fa-feather', 'fa-gem',
+            'fa-music', 'fa-palette', 'fa-camera', 'fa-gamepad',
+            'fa-trophy', 'fa-medal', 'fa-crown', 'fa-rocket',
+            'fa-walk', 'fa-water', 'fa-utensils', 'fa-drum',
+            'fa-hand-fist', 'fa-person-skiing', 'fa-person-snowboarding', 'fa-person-running',
+        ];
+
+        function genId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
+
+        function getDefaultConfig() {
+            return {
+                planName: 'Keep Sharp',
+                subtitle: '2026 Round 2 - 12 weeks',
+                totalWeeks: 12,
+                startDate: '2026-03-09',
+                categories: [
+                    {
+                        id: genId(),
+                        name: '运动',
+                        color: '#00d4ff',
+                        tasks: [
+                            { id: genId(), name: '游泳', icon: 'fa-person-swimming' },
+                            { id: genId(), name: '核①', icon: 'fa-dumbbell' },
+                            { id: genId(), name: '核②', icon: 'fa-dumbbell' },
+                            { id: genId(), name: '核③', icon: 'fa-dumbbell' },
+                            { id: genId(), name: '二①', icon: 'fa-person-biking' },
+                            { id: genId(), name: '二②', icon: 'fa-person-biking' },
+                            { id: genId(), name: '二③', icon: 'fa-person-biking' },
+                        ]
+                    },
+                    {
+                        id: genId(),
+                        name: '饮食',
+                        color: '#ff6b9d',
+                        tasks: [
+                            { id: genId(), name: '冷①', icon: 'fa-fish' },
+                            { id: genId(), name: '冷②', icon: 'fa-fish' },
+                            { id: genId(), name: '新早', icon: 'fa-carrot' },
+                        ]
+                    },
+                    {
+                        id: genId(),
+                        name: '学习',
+                        color: '#7b61ff',
+                        tasks: [
+                            { id: genId(), name: '读用①', icon: 'fa-book' },
+                            { id: genId(), name: '读用②', icon: 'fa-book' },
+                            { id: genId(), name: '读用③', icon: 'fa-book' },
+                            { id: genId(), name: '乐器', icon: 'fa-guitar' },
+                        ]
+                    }
+                ]
+            };
+        }
+
+        var config = null;
+        var records = {};
+        var templates = [];
+        var currentMode = 'checkin';
+        var pickingTaskId = null;
+        var selectedIcon = null;
+
+        var CONFIG_KEY = 'keepsharp_config_v2';
+        var RECORDS_KEY = 'keepsharp_records_v2';
+        var TEMPLATES_KEY = 'keepsharp_templates_v2';
+
+        function escHtml(str) {
+            var div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function showSaveStatus(msg) {
+            var el = document.getElementById('saveStatus');
+            el.textContent = msg || '已保存';
+            el.classList.add('show');
+            clearTimeout(el._timer);
+            el._timer = setTimeout(function() { el.classList.remove('show'); }, 2000);
+        }
+
+        function flattenTasks(cfg) {
+            var tasks = [];
+            cfg.categories.forEach(function(cat) {
+                cat.tasks.forEach(function(task) {
+                    tasks.push({ id: task.id, name: task.name, icon: task.icon, categoryId: cat.id, categoryName: cat.name, categoryColor: cat.color });
+                });
+            });
+            return tasks;
+        }
+
+        function formatDate(d) {
+            return String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+        }
+
+        function generateWeekDates(startDateStr, totalWeeks) {
+            var startDate = new Date(startDateStr + 'T00:00:00');
+            var weeks = [];
+            for (var i = 0; i < totalWeeks; i++) {
+                var weekStart = new Date(startDate);
+                weekStart.setDate(startDate.getDate() + i * 7);
+                var weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                weeks.push(formatDate(weekStart) + '~' + formatDate(weekEnd));
+            }
+            return weeks;
+        }
+
+        function saveConfig() { localStorage.setItem(CONFIG_KEY, JSON.stringify(config)); }
+        function saveRecords() { localStorage.setItem(RECORDS_KEY, JSON.stringify(records)); }
+        function saveTemplates() { localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates)); }
+
+        function loadConfig() {
+            var saved = localStorage.getItem(CONFIG_KEY);
+            if (saved) {
+                try {
+                    var parsed = JSON.parse(saved);
+                    if (parsed && parsed.planName && parsed.categories && parsed.categories.length > 0) return parsed;
+                } catch(e) {}
+            }
+            return getDefaultConfig();
+        }
+
+        function loadRecords() {
+            var saved = localStorage.getItem(RECORDS_KEY);
+            if (saved) { try { return JSON.parse(saved); } catch(e) {} }
+            return {};
+        }
+
+        function loadTemplates() {
+            var saved = localStorage.getItem(TEMPLATES_KEY);
+            if (saved) { try { var p = JSON.parse(saved); if (Array.isArray(p)) return p; } catch(e) {} }
+            return [];
+        }
+
+        function getConfigFromUI() {
+            var planName = document.getElementById('input-plan-name').value.trim() || 'My Plan';
+            var subtitle = document.getElementById('input-plan-subtitle').value.trim();
+            var totalWeeks = parseInt(document.getElementById('input-total-weeks').value) || 12;
+            var startDate = document.getElementById('input-start-date').value;
+            var categories = [];
+            var catCards = document.querySelectorAll('.category-card');
+            catCards.forEach(function(card) {
+                var catId = card.dataset.catId;
+                var nameInput = card.querySelector('.cat-name-input');
+                var colorInput = card.querySelector('.cat-color-input');
+                var catName = nameInput.value.trim() || '未命名';
+                var color = colorInput.value;
+                var tasks = [];
+                var taskItems = card.querySelectorAll('.task-item');
+                taskItems.forEach(function(item) {
+                    var taskId = item.dataset.taskId;
+                    var nameInp = item.querySelector('.task-name-input');
+                    var iconEl = item.querySelector('.icon-trigger i');
+                    var taskName = nameInp.value.trim() || '任务';
+                    var icon = 'fa-star';
+                    if (iconEl) {
+                        var cls = iconEl.className;
+                        var match = cls.match(/fa-[a-z0-9-]+/g);
+                        if (match) icon = match[0];
+                    }
+                    tasks.push({ id: taskId, name: taskName, icon: icon });
+                });
+                categories.push({ id: catId, name: catName, color: color, tasks: tasks });
+            });
+            return { planName: planName, subtitle: subtitle, totalWeeks: totalWeeks, startDate: startDate, categories: categories };
+        }
+
+        function applyConfigToUI(cfg) {
+            document.getElementById('input-plan-name').value = cfg.planName || 'My Plan';
+            document.getElementById('input-plan-subtitle').value = cfg.subtitle || '';
+            document.getElementById('input-total-weeks').value = cfg.totalWeeks || 12;
+            document.getElementById('input-start-date').value = cfg.startDate || '';
+            renderCategoryEditor(cfg.categories);
+        }
+
+        function renderCategoryEditor(categories) {
+            var container = document.getElementById('category-editor');
+            container.innerHTML = '';
+            categories.forEach(function(cat) {
+                var card = document.createElement('div');
+                card.className = 'category-card';
+                card.dataset.catId = cat.id;
+                var header = document.createElement('div');
+                header.className = 'category-header';
+                header.innerHTML = '<input class="cat-name-input" type="text" value="' + escHtml(cat.name) + '" oninput="onConfigChange()">' +
+                    '<div class="color-picker-wrapper">' +
+                    '<input class="cat-color-input" type="color" value="' + cat.color + '" oninput="onConfigChange()">' +
+                    '<span class="color-hex">' + cat.color + '</span></div>' +
+                    '<button class="del-cat-btn" onclick="deleteCategory(\'' + cat.id + '\')"><i class="fas fa-trash"></i> 删除</button>';
+                card.appendChild(header);
+                var taskList = document.createElement('div');
+                taskList.className = 'task-list';
+                cat.tasks.forEach(function(task) {
+                    var item = document.createElement('div');
+                    item.className = 'task-item';
+                    item.dataset.taskId = task.id;
+                    item.innerHTML = '<span class="icon-trigger" onclick="openIconPicker(\'' + task.id + '\')"><i class="fas ' + task.icon + '"></i></span>' +
+                        '<input class="task-name-input" type="text" value="' + escHtml(task.name) + '" oninput="onConfigChange()">' +
+                        '<button class="btn-icon-only" onclick="deleteTask(\'' + cat.id + '\',\'' + task.id + '\')"><i class="fas fa-times"></i></button>';
+                    taskList.appendChild(item);
+                });
+                card.appendChild(taskList);
+                var addBtn = document.createElement('button');
+                addBtn.className = 'btn-icon-only add-task';
+                addBtn.innerHTML = '<i class="fas fa-plus"></i> 添加任务';
+                addBtn.onclick = function() { addTask(cat.id); };
+                card.appendChild(addBtn);
+                container.appendChild(card);
+            });
+        }
+
+        function onConfigChange() {
+            var newConfig = getConfigFromUI();
+            config.planName = newConfig.planName;
+            config.subtitle = newConfig.subtitle;
+            config.totalWeeks = newConfig.totalWeeks;
+            config.startDate = newConfig.startDate;
+            config.categories = newConfig.categories;
+            saveConfig();
+            updateHeader();
+            if (currentMode === 'checkin') renderCheckin();
+        }
+
+        function addCategory() {
+            config.categories.push({ id: genId(), name: '新分类', color: '#00d4ff', tasks: [{ id: genId(), name: '任务', icon: 'fa-star' }] });
+            saveConfig();
+            renderCategoryEditor(config.categories);
+            if (currentMode === 'checkin') renderCheckin();
+            updateHeader();
+        }
+
+        function deleteCategory(catId) {
+            if (!confirm('确定要删除这个分类及其所有任务吗？')) return;
+            config.categories = config.categories.filter(function(c) { return c.id !== catId; });
+            cleanupRecords();
+            saveConfig();
+            renderCategoryEditor(config.categories);
+            if (currentMode === 'checkin') renderCheckin();
+            updateHeader();
+        }
+
+        function addTask(catId) {
+            var cat = config.categories.find(function(c) { return c.id === catId; });
+            if (!cat) return;
+            cat.tasks.push({ id: genId(), name: '新任务', icon: 'fa-star' });
+            saveConfig();
+            renderCategoryEditor(config.categories);
+            if (currentMode === 'checkin') renderCheckin();
+        }
+
+        function deleteTask(catId, taskId) {
+            var cat = config.categories.find(function(c) { return c.id === catId; });
+            if (!cat) return;
+            cat.tasks = cat.tasks.filter(function(t) { return t.id !== taskId; });
+            Object.keys(records).forEach(function(key) { if (key.endsWith(taskId)) delete records[key]; });
+            saveRecords();
+            saveConfig();
+            renderCategoryEditor(config.categories);
+            if (currentMode === 'checkin') renderCheckin();
+        }
+
+        function cleanupRecords() {
+            var allTaskIds = {};
+            config.categories.forEach(function(c) { c.tasks.forEach(function(t) { allTaskIds[t.id] = true; }); });
+            Object.keys(records).forEach(function(key) {
+                var taskId = key.split('-')[1];
+                if (!allTaskIds[taskId]) delete records[key];
+            });
+            saveRecords();
+        }
+
+        function updateHeader() {
+            document.getElementById('plan-title').textContent = config.planName || 'My Plan';
+            document.getElementById('plan-subtitle').textContent = config.subtitle || '';
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(function(btn) {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            document.getElementById('setup-section').classList.toggle('active', mode === 'setup');
+            document.getElementById('checkin-section').classList.toggle('active', mode === 'checkin');
+            if (mode === 'setup') {
+                applyConfigToUI(config);
+                renderTemplates();
+            } else {
+                renderCheckin();
+            }
+        }
+
+        function openIconPicker(taskId) {
+            pickingTaskId = taskId;
+            var tasks = flattenTasks(config);
+            var task = tasks.find(function(t) { return t.id === taskId; });
+            selectedIcon = task ? task.icon : 'fa-star';
+            var grid = document.getElementById('icon-grid');
+            grid.innerHTML = '';
+            AVAILABLE_ICONS.forEach(function(icon) {
+                var div = document.createElement('div');
+                div.className = 'icon-option' + (icon === selectedIcon ? ' selected' : '');
+                div.innerHTML = '<i class="fas ' + icon + '"></i>';
+                div.onclick = function() {
+                    document.querySelectorAll('.icon-option').forEach(function(el) { el.classList.remove('selected'); });
+                    div.classList.add('selected');
+                    selectedIcon = icon;
+                };
+                grid.appendChild(div);
+            });
+            document.getElementById('icon-modal').classList.add('show');
+        }
+
+        function closeIconPicker() {
+            document.getElementById('icon-modal').classList.remove('show');
+            pickingTaskId = null;
+            selectedIcon = null;
+        }
+
+        function confirmIcon() {
+            if (pickingTaskId && selectedIcon) {
+                config.categories.forEach(function(cat) {
+                    cat.tasks.forEach(function(task) {
+                        if (task.id === pickingTaskId) task.icon = selectedIcon;
+                    });
+                });
+                saveConfig();
+                renderCategoryEditor(config.categories);
+                if (currentMode === 'checkin') renderCheckin();
+            }
+            closeIconPicker();
+        }
+
+        function renderTemplates() {
+            var container = document.getElementById('template-list');
+            if (templates.length === 0) {
+                container.innerHTML = '<div class="empty-tpl"><i class="fas fa-folder-open"></i> 暂无保存的模板</div>';
+                return;
+            }
+            container.innerHTML = '';
+            templates.forEach(function(tpl) {
+                var el = document.createElement('div');
+                el.className = 'template-item';
+                var taskCount = 0;
+                tpl.config.categories.forEach(function(c) { taskCount += c.tasks.length; });
+                el.innerHTML = '<div><div class="tpl-name"><i class="fas fa-puzzle-piece"></i> ' + escHtml(tpl.name) + '</div>' +
+                    '<div class="tpl-info">' + tpl.config.categories.length + ' 个分类 ' + taskCount + ' 个任务 ' + tpl.config.totalWeeks + ' 周</div></div>' +
+                    '<div class="tpl-actions">' +
+                    '<button class="tpl-load-btn" onclick="loadTemplate(\'' + tpl.id + '\')"><i class="fas fa-download"></i> 加载</button>' +
+                    '<button class="tpl-export-btn" onclick="exportSingleTemplate(\'' + tpl.id + '\')"><i class="fas fa-file-export"></i> 导出</button>' +
+                    '<button class="tpl-del-btn" onclick="deleteTemplate(\'' + tpl.id + '\')"><i class="fas fa-trash"></i> 删除</button></div>';
+                container.appendChild(el);
+            });
+        }
+
+        function saveTemplate() {
+            var name = prompt('请输入模板名称：', config.planName + ' 模板');
+            if (!name || !name.trim()) return;
+            templates.push({ id: genId(), name: name.trim(), config: JSON.parse(JSON.stringify(config)), createdAt: new Date().toISOString() });
+            saveTemplates();
+            renderTemplates();
+            showSaveStatus('模板已保存');
+        }
+
+        function loadTemplate(tplId) {
+            if (Object.keys(records).length > 0) {
+                if (!confirm('加载模板将替换当前计划配置，但已有打卡数据会保留（匹配的任务ID保留记录）。继续吗？')) return;
+            }
+            var tpl = templates.find(function(t) { return t.id === tplId; });
+            if (!tpl) return;
+            config = JSON.parse(JSON.stringify(tpl.config));
+            saveConfig();
+            cleanupRecords();
+            applyConfigToUI(config);
+            updateHeader();
+            if (currentMode === 'checkin') renderCheckin();
+            showSaveStatus('模板已加载');
+        }
+
+        function deleteTemplate(tplId) {
+            if (!confirm('确定删除此模板？')) return;
+            templates = templates.filter(function(t) { return t.id !== tplId; });
+            saveTemplates();
+            renderTemplates();
+        }
+
+        function downloadJSON(obj, filename) {
+            var blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportTemplate() {
+            downloadJSON({ name: config.planName + ' 模板', config: JSON.parse(JSON.stringify(config)), exportedAt: new Date().toISOString() }, config.planName + '_template.json');
+        }
+
+        function exportSingleTemplate(tplId) {
+            var tpl = templates.find(function(t) { return t.id === tplId; });
+            if (tpl) downloadJSON({ name: tpl.name, config: tpl.config, exportedAt: new Date().toISOString() }, tpl.name + '.json');
+        }
+
+        function importTemplate() {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        var data = JSON.parse(event.target.result);
+                        if (data && data.config && data.config.categories) {
+                            if (Object.keys(records).length > 0 && !confirm('导入模板将替换当前计划配置。继续吗？')) return;
+                            config = data.config;
+                            saveConfig();
+                            cleanupRecords();
+                            applyConfigToUI(config);
+                            updateHeader();
+                            if (currentMode === 'checkin') renderCheckin();
+                            showSaveStatus('模板已导入');
+                            templates.push({ id: genId(), name: data.name || (config.planName + ' 模板'), config: JSON.parse(JSON.stringify(config)), createdAt: new Date().toISOString() });
+                            saveTemplates();
+                            renderTemplates();
+                        } else { alert('文件格式不正确'); }
+                    } catch(err) { alert('无法解析文件'); }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function getColumnWidths(taskCount) {
+            var isMobile = window.innerWidth <= 768;
+            if (isMobile) return { weekCol: 70, taskCol: 44, progressCol: 100 };
+            var taskCol = 60;
+            if (taskCount > 14) taskCol = 54;
+            if (taskCount > 18) taskCol = 48;
+            return { weekCol: 130, taskCol: taskCol, progressCol: 200 };
+        }
+
+        function renderCheckin() {
+            var tasks = flattenTasks(config);
+            var totalWeeks = config.totalWeeks || 12;
+            var weekDates = generateWeekDates(config.startDate, totalWeeks);
+            var colWidths = getColumnWidths(tasks.length);
+
+            var headerContainer = document.getElementById('tracker-header');
+            var headerHtml = '<div class="week-col" style="width:' + colWidths.weekCol + 'px;min-width:' + colWidths.weekCol + 'px;">周 / 日期</div>';
+            tasks.forEach(function(task) {
+                headerHtml += '<div class="task-col" style="width:' + colWidths.taskCol + 'px;min-width:' + colWidths.taskCol + 'px;background:' + task.categoryColor + '33;">' +
+                    '<i class="fas ' + task.icon + '"></i> ' + escHtml(task.name) + '</div>';
+            });
+            headerHtml += '<div style="width:' + colWidths.progressCol + 'px;min-width:' + colWidths.progressCol + 'px;"><i class="fas fa-percent"></i> 进度</div>';
+            headerContainer.innerHTML = headerHtml;
+            headerContainer.style.gridTemplateColumns = colWidths.weekCol + 'px repeat(' + tasks.length + ', ' + colWidths.taskCol + 'px) ' + colWidths.progressCol + 'px';
+
+            var weeksContainer = document.getElementById('weeks-container');
+            weeksContainer.innerHTML = '';
+
+            for (var w = 0; w < totalWeeks; w++) {
+                tasks.forEach(function(task) {
+                    var key = w + '-' + task.id;
+                    if (records[key] === undefined) records[key] = false;
+                });
+            }
+
+            for (var w = 0; w < totalWeeks; w++) {
+                var row = document.createElement('div');
+                row.className = 'week-row';
+                row.style.gridTemplateColumns = colWidths.weekCol + 'px repeat(' + tasks.length + ', ' + colWidths.taskCol + 'px) ' + colWidths.progressCol + 'px';
+
+                var weekNum = document.createElement('div');
+                weekNum.className = 'week-num';
+                weekNum.innerHTML = '<span class="week-label">W' + (w + 1) + '</span><span class="date-range">' + (weekDates[w] || '') + '</span>';
+                row.appendChild(weekNum);
+
+                var completed = 0;
+                tasks.forEach(function(task) {
+                    var key = w + '-' + task.id;
+                    var checked = records[key] === true;
+                    if (checked) completed++;
+                    var cell = document.createElement('div');
+                    cell.className = 'check-cell' + (checked ? ' checked' : '');
+                    cell.style.background = checked ? '' : task.categoryColor + '0D';
+                    cell.onclick = (function(wi, ti) { return function() { toggleCheck(wi, ti); }; })(w, task.id);
+                    row.appendChild(cell);
+                });
+
+                var percent = tasks.length > 0 ? Math.round(completed / tasks.length * 100) : 0;
+                var progressCol = document.createElement('div');
+                progressCol.className = 'progress-col';
+                progressCol.innerHTML = '<div class="progress-bar"><div class="progress-fill" style="width:' + percent + '%"></div><span class="progress-text">' + percent + '%</span></div>';
+                row.appendChild(progressCol);
+                weeksContainer.appendChild(row);
+            }
+
+            renderSummary(tasks, totalWeeks, colWidths);
+            renderLegend();
+        }
+
+        function renderSummary(tasks, totalWeeks, colWidths) {
+            var summaryRow = document.getElementById('summary-row');
+            summaryRow.style.gridTemplateColumns = colWidths.weekCol + 'px repeat(' + tasks.length + ', ' + colWidths.taskCol + 'px) ' + colWidths.progressCol + 'px';
+            var html = '<div class="summary-label">总计</div>';
+            tasks.forEach(function(task) {
+                var count = 0;
+                for (var w = 0; w < totalWeeks; w++) { if (records[w + '-' + task.id] === true) count++; }
+                html += '<div class="total-count">' + count + '</div>';
+            });
+            var totalCompleted = 0;
+            var totalCells = totalWeeks * tasks.length;
+            for (var w = 0; w < totalWeeks; w++) {
+                tasks.forEach(function(task) { if (records[w + '-' + task.id] === true) totalCompleted++; });
+            }
+            var avgPercent = totalCells > 0 ? Math.round(totalCompleted / totalCells * 100) : 0;
+            html += '<div class="progress-col" style="border-top:2px solid rgba(123,97,255,0.3);"><div class="progress-bar"><div class="progress-fill" style="width:' + avgPercent + '%"></div><span class="progress-text">' + avgPercent + '%</span></div></div>';
+            summaryRow.innerHTML = html;
+        }
+
+        function renderLegend() {
+            var container = document.getElementById('legend-container');
+            container.innerHTML = '';
+            config.categories.forEach(function(cat) {
+                var item = document.createElement('div');
+                item.className = 'legend-item';
+                var icons = '';
+                cat.tasks.forEach(function(t) { icons += '<i class="fas ' + t.icon + '"></i> '; });
+                item.innerHTML = '<span class="legend-dot" style="background:' + cat.color + ';color:' + cat.color + ';"></span><span class="legend-text">' + escHtml(cat.name) + ': ' + icons + '</span>';
+                container.appendChild(item);
+            });
+        }
+
+        function toggleCheck(weekIdx, taskId) {
+            var key = weekIdx + '-' + taskId;
+            records[key] = !records[key];
+            saveRecords();
+            renderCheckin();
+        }
+
+        function exportRecords() {
+            var tasks = flattenTasks(config);
+            downloadJSON({
+                version: '3.0',
+                exportDate: new Date().toISOString(),
+                config: config,
+                records: records,
+                stats: { totalCompleted: Object.values(records).filter(function(v) { return v === true; }).length, totalTasks: config.totalWeeks * tasks.length }
+            }, config.planName + '_backup_' + new Date().toISOString().split('T')[0] + '.json');
+        }
+
+        function importRecords() {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        var data = JSON.parse(event.target.result);
+                        if (data.records) {
+                            records = data.records;
+                            saveRecords();
+                            if (data.config && confirm('备份文件包含计划配置，是否同时恢复配置？')) {
+                                config = data.config;
+                                saveConfig();
+                                applyConfigToUI(config);
+                                updateHeader();
+                            }
+                            renderCheckin();
+                            showSaveStatus('数据已导入');
+                        } else { alert('数据格式不正确'); }
+                    } catch(err) { alert('无法解析文件'); }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function clearRecords() {
+            if (!confirm('确定要清空所有打卡记录吗？此操作不可恢复。')) return;
+            records = {};
+            saveRecords();
+            renderCheckin();
+            showSaveStatus('已清空');
+        }
+
+        function migrateOldData() {
+            var oldKey = 'keepsharp_data_v3';
+            var oldData = localStorage.getItem(oldKey);
+            if (oldData && Object.keys(records).length === 0) {
+                try {
+                    var parsed = JSON.parse(oldData);
+                    if (Array.isArray(parsed) && parsed.length === 12) {
+                        var tasks = flattenTasks(config);
+                        if (tasks.length === 14) {
+                            for (var w = 0; w < parsed.length; w++) {
+                                for (var t = 0; t < parsed[w].length; t++) {
+                                    if (parsed[w][t] && tasks[t]) records[w + '-' + tasks[t].id] = true;
+                                }
+                            }
+                            saveRecords();
+                            localStorage.removeItem(oldKey);
+                        }
+                    }
+                } catch(e) {}
+            }
+        }
+
+        var resizeTimer = null;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() { if (currentMode === 'checkin') renderCheckin(); }, 200);
+        });
+
+        document.getElementById('icon-modal').addEventListener('click', function(e) { if (e.target === e.currentTarget) closeIconPicker(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeIconPicker(); });
+
+        function init() {
+            config = loadConfig();
+            records = loadRecords();
+            templates = loadTemplates();
+            migrateOldData();
+            updateHeader();
+            applyConfigToUI(config);
+            currentMode = 'checkin';
+            document.querySelectorAll('.mode-btn').forEach(function(btn) { btn.classList.toggle('active', btn.dataset.mode === 'checkin'); });
+            document.getElementById('checkin-section').classList.add('active');
+            document.getElementById('setup-section').classList.remove('active');
+            renderCheckin();
+        }
+
+        init();
+    </script>
+</body>
+</html>
