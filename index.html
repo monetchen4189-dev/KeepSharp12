@@ -206,6 +206,21 @@
 
         .task-item .task-name-input:focus { border-bottom-color: #00d4ff; }
 
+        .freq-input {
+            width: 32px;
+            padding: 2px 4px;
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 4px;
+            background: rgba(15,12,41,0.6);
+            color: #b4a7ff;
+            font-size: 0.75rem;
+            text-align: center;
+            outline: none;
+        }
+
+        .freq-input:focus { border-color: #00d4ff; }
+        .freq-label { color: #7b61ff; font-size: 0.7rem; }
+
         .icon-trigger {
             cursor: pointer;
             font-size: 1.3rem;
@@ -742,13 +757,9 @@
                         name: '运动',
                         color: '#00d4ff',
                         tasks: [
-                            { id: genId(), name: '游泳', icon: '🏊' },
-                            { id: genId(), name: '核①', icon: '💪' },
-                            { id: genId(), name: '核②', icon: '💪' },
-                            { id: genId(), name: '核③', icon: '💪' },
-                            { id: genId(), name: '二①', icon: '🚴' },
-                            { id: genId(), name: '二②', icon: '🚴' },
-                            { id: genId(), name: '二③', icon: '🚴' },
+                            { id: genId(), name: '游泳', icon: '🏊', frequency: 1 },
+                            { id: genId(), name: '核心', icon: '💪', frequency: 3 },
+                            { id: genId(), name: '二区', icon: '🚴', frequency: 3 },
                         ]
                     },
                     {
@@ -756,9 +767,8 @@
                         name: '饮食',
                         color: '#ff6b9d',
                         tasks: [
-                            { id: genId(), name: '冷①', icon: '🐟' },
-                            { id: genId(), name: '冷②', icon: '🐟' },
-                            { id: genId(), name: '新早', icon: '🥕' },
+                            { id: genId(), name: '冷水鱼', icon: '🐟', frequency: 2 },
+                            { id: genId(), name: '新早', icon: '🥕', frequency: 1 },
                         ]
                     },
                     {
@@ -766,10 +776,8 @@
                         name: '学习',
                         color: '#7b61ff',
                         tasks: [
-                            { id: genId(), name: '读用①', icon: '📚' },
-                            { id: genId(), name: '读用②', icon: '📚' },
-                            { id: genId(), name: '读用③', icon: '📚' },
-                            { id: genId(), name: '乐器', icon: '🎸' },
+                            { id: genId(), name: '读用', icon: '📚', frequency: 3 },
+                            { id: genId(), name: '乐器', icon: '🎸', frequency: 1 },
                         ]
                     }
                 ]
@@ -802,13 +810,16 @@
         }
 
         function flattenTasks(cfg) {
-            var tasks = [];
+            var cells = [];
             cfg.categories.forEach(function(cat) {
                 cat.tasks.forEach(function(task) {
-                    tasks.push({ id: task.id, name: task.name, icon: task.icon, categoryId: cat.id, categoryName: cat.name, categoryColor: cat.color });
+                    var freq = task.frequency || 1;
+                    for (var o = 0; o < freq; o++) {
+                        cells.push({ id: task.id, name: task.name, icon: task.icon, categoryId: cat.id, categoryName: cat.name, categoryColor: cat.color, occIdx: o, totalFreq: freq });
+                    }
                 });
             });
-            return tasks;
+            return cells;
         }
 
         function formatDate(d) {
@@ -874,12 +885,14 @@
                     var taskId = item.dataset.taskId;
                     var nameInp = item.querySelector('.task-name-input');
                     var iconEl = item.querySelector('.icon-trigger');
+                    var freqInp = item.querySelector('.freq-input');
                     var taskName = nameInp.value.trim() || '任务';
                     var icon = '⭐';
                     if (iconEl) {
                         icon = iconEl.textContent.trim() || '⭐';
                     }
-                    tasks.push({ id: taskId, name: taskName, icon: icon });
+                    var freq = parseInt(freqInp ? freqInp.value : 1) || 1;
+                    tasks.push({ id: taskId, name: taskName, icon: icon, frequency: freq });
                 });
                 categories.push({ id: catId, name: catName, color: color, tasks: tasks });
             });
@@ -912,11 +925,13 @@
                 var taskList = document.createElement('div');
                 taskList.className = 'task-list';
                 cat.tasks.forEach(function(task) {
+                    var freq = task.frequency || 1;
                     var item = document.createElement('div');
                     item.className = 'task-item';
                     item.dataset.taskId = task.id;
                     item.innerHTML = '<span class="icon-trigger" onclick="openIconPicker(\'' + task.id + '\')">' + escHtml(task.icon) + '</span>' +
                         '<input class="task-name-input" type="text" value="' + escHtml(task.name) + '" oninput="onConfigChange()">' +
+                        '<span class="freq-label">×</span><input class="freq-input" type="number" min="1" max="20" value="' + freq + '" oninput="onConfigChange()">' +
                         '<button class="btn-icon-only" onclick="deleteTask(\'' + cat.id + '\',\'' + task.id + '\')">✕</button>';
                     taskList.appendChild(item);
                 });
@@ -943,7 +958,7 @@
         }
 
         function addCategory() {
-            config.categories.push({ id: genId(), name: '新分类', color: '#00d4ff', tasks: [{ id: genId(), name: '任务', icon: '⭐' }] });
+            config.categories.push({ id: genId(), name: '新分类', color: '#00d4ff', tasks: [{ id: genId(), name: '任务', icon: '⭐', frequency: 1 }] });
             saveConfig();
             renderCategoryEditor(config.categories);
             if (currentMode === 'checkin') renderCheckin();
@@ -963,7 +978,7 @@
         function addTask(catId) {
             var cat = config.categories.find(function(c) { return c.id === catId; });
             if (!cat) return;
-            cat.tasks.push({ id: genId(), name: '新任务', icon: '⭐' });
+            cat.tasks.push({ id: genId(), name: '新任务', icon: '⭐', frequency: 1 });
             saveConfig();
             renderCategoryEditor(config.categories);
             if (currentMode === 'checkin') renderCheckin();
@@ -973,7 +988,10 @@
             var cat = config.categories.find(function(c) { return c.id === catId; });
             if (!cat) return;
             cat.tasks = cat.tasks.filter(function(t) { return t.id !== taskId; });
-            Object.keys(records).forEach(function(key) { if (key.endsWith(taskId)) delete records[key]; });
+            Object.keys(records).forEach(function(key) {
+                var parts = key.split('-');
+                if (parts[1] === taskId) delete records[key];
+            });
             saveRecords();
             saveConfig();
             renderCategoryEditor(config.categories);
@@ -1012,8 +1030,10 @@
 
         function openIconPicker(taskId) {
             pickingTaskId = taskId;
-            var tasks = flattenTasks(config);
-            var task = tasks.find(function(t) { return t.id === taskId; });
+            var task = null;
+            config.categories.forEach(function(cat) {
+                cat.tasks.forEach(function(t) { if (t.id === taskId) task = t; });
+            });
             selectedIcon = task ? task.icon : '⭐';
             var grid = document.getElementById('icon-grid');
             grid.innerHTML = '';
@@ -1174,8 +1194,9 @@
             var headerContainer = document.getElementById('tracker-header');
             var headerHtml = '<div class="week-col" style="width:' + colWidths.weekCol + 'px;min-width:' + colWidths.weekCol + 'px;">周 / 日期</div>';
             tasks.forEach(function(task) {
+                var label = task.totalFreq > 1 ? (task.name + (task.occIdx + 1)) : task.name;
                 headerHtml += '<div class="task-col" style="width:' + colWidths.taskCol + 'px;min-width:' + colWidths.taskCol + 'px;background:' + task.categoryColor + '33;">' +
-                    '<span class="task-emoji">' + escHtml(task.icon) + '</span> ' + escHtml(task.name) + '</div>';
+                    '<span class="task-emoji">' + escHtml(task.icon) + '</span> ' + escHtml(label) + '</div>';
             });
             headerHtml += '<div style="width:' + colWidths.progressCol + 'px;min-width:' + colWidths.progressCol + 'px;">% 进度</div>';
             headerContainer.innerHTML = headerHtml;
@@ -1186,7 +1207,7 @@
 
             for (var w = 0; w < totalWeeks; w++) {
                 tasks.forEach(function(task) {
-                    var key = w + '-' + task.id;
+                    var key = w + '-' + task.id + '-' + task.occIdx;
                     if (records[key] === undefined) records[key] = false;
                 });
             }
@@ -1203,13 +1224,13 @@
 
                 var completed = 0;
                 tasks.forEach(function(task) {
-                    var key = w + '-' + task.id;
+                    var key = w + '-' + task.id + '-' + task.occIdx;
                     var checked = records[key] === true;
                     if (checked) completed++;
                     var cell = document.createElement('div');
                     cell.className = 'check-cell' + (checked ? ' checked' : '');
                     cell.style.background = checked ? '' : task.categoryColor + '0D';
-                    cell.onclick = (function(wi, ti) { return function() { toggleCheck(wi, ti); }; })(w, task.id);
+                    cell.onclick = (function(wi, ti, oi) { return function() { toggleCheck(wi, ti, oi); }; })(w, task.id, task.occIdx);
                     row.appendChild(cell);
                 });
 
@@ -1231,13 +1252,13 @@
             var html = '<div class="summary-label">总计</div>';
             tasks.forEach(function(task) {
                 var count = 0;
-                for (var w = 0; w < totalWeeks; w++) { if (records[w + '-' + task.id] === true) count++; }
+                for (var w = 0; w < totalWeeks; w++) { if (records[w + '-' + task.id + '-' + task.occIdx] === true) count++; }
                 html += '<div class="total-count">' + count + '</div>';
             });
             var totalCompleted = 0;
             var totalCells = totalWeeks * tasks.length;
             for (var w = 0; w < totalWeeks; w++) {
-                tasks.forEach(function(task) { if (records[w + '-' + task.id] === true) totalCompleted++; });
+                tasks.forEach(function(task) { if (records[w + '-' + task.id + '-' + task.occIdx] === true) totalCompleted++; });
             }
             var avgPercent = totalCells > 0 ? Math.round(totalCompleted / totalCells * 100) : 0;
             html += '<div class="progress-col" style="border-top:2px solid rgba(123,97,255,0.3);"><div class="progress-bar"><div class="progress-fill" style="width:' + avgPercent + '%"></div><span class="progress-text">' + avgPercent + '%</span></div></div>';
@@ -1269,8 +1290,8 @@
             });
         }
 
-        function toggleCheck(weekIdx, taskId) {
-            var key = weekIdx + '-' + taskId;
+        function toggleCheck(weekIdx, taskId, occIdx) {
+            var key = weekIdx + '-' + taskId + '-' + occIdx;
             records[key] = !records[key];
             saveRecords();
             renderCheckin();
@@ -1279,7 +1300,7 @@
         function exportRecords() {
             var tasks = flattenTasks(config);
             downloadJSON({
-                version: '3.0',
+                version: '3.1',
                 exportDate: new Date().toISOString(),
                 config: config,
                 records: records,
@@ -1325,26 +1346,17 @@
             showSaveStatus('已清空');
         }
 
-        function migrateOldData() {
-            var oldKey = 'keepsharp_data_v3';
-            var oldData = localStorage.getItem(oldKey);
-            if (oldData && Object.keys(records).length === 0) {
-                try {
-                    var parsed = JSON.parse(oldData);
-                    if (Array.isArray(parsed) && parsed.length === 12) {
-                        var tasks = flattenTasks(config);
-                        if (tasks.length === 14) {
-                            for (var w = 0; w < parsed.length; w++) {
-                                for (var t = 0; t < parsed[w].length; t++) {
-                                    if (parsed[w][t] && tasks[t]) records[w + '-' + tasks[t].id] = true;
-                                }
-                            }
-                            saveRecords();
-                            localStorage.removeItem(oldKey);
-                        }
+        function upgradeOldConfig() {
+            var needSave = false;
+            config.categories.forEach(function(cat) {
+                cat.tasks.forEach(function(task) {
+                    if (!task.frequency) {
+                        task.frequency = 1;
+                        needSave = true;
                     }
-                } catch(e) {}
-            }
+                });
+            });
+            if (needSave) saveConfig();
         }
 
         var resizeTimer = null;
@@ -1360,7 +1372,7 @@
             config = loadConfig();
             records = loadRecords();
             templates = loadTemplates();
-            migrateOldData();
+            upgradeOldConfig();
             updateHeader();
             applyConfigToUI(config);
             currentMode = 'checkin';
